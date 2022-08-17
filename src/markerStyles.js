@@ -24,3 +24,9 @@ export const cityMarkerStyle = {
     opacity: 1,
     fillOpacity: 0.8
 }
+
+export const popUpStyle = {
+    'minWidth': 250,
+    'maxWidth': 400,
+    'className': 'custom'
+}

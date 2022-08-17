@@ -6,12 +6,12 @@ import { Link } from "react-router-dom";
 import settlementService from "../services/settlementService";
 
 //Leaflet mapping library
-import { MapContainer, TileLayer, LayerGroup, GeoJSON, CircleMarker } from 'react-leaflet';
+import { MapContainer, TileLayer, LayerGroup, GeoJSON } from 'react-leaflet';
 import L from 'leaflet';
 
 //style
 import 'leaflet/dist/leaflet.css';
-import { secondaryAgglomerationMarkerStyle, possibleCityMarkerStyle, cityMarkerStyle } from '../markerStyles';
+import { popUpStyle, secondaryAgglomerationMarkerStyle, possibleCityMarkerStyle, cityMarkerStyle } from '../markerStyles';
 
 const Atlas = () => {
 
@@ -33,6 +33,7 @@ const Atlas = () => {
         findAll();
     }, []);
 
+    //filters style based on settlement status
     const styleDifferentiator = (settlementProperties) => {
         if (settlementProperties.status === 'SECONDARY_AGGLOMERATION') {
             return secondaryAgglomerationMarkerStyle;
@@ -41,6 +42,24 @@ const Atlas = () => {
         } else if (settlementProperties.status === 'SELF_GOVERNING') {
             return cityMarkerStyle;
         }
+    }
+
+    //binding popups to points
+    // to do: standardize layer-fields
+    const createPopupText = (data) => {
+        let name = data.name;
+        let status = data.status;
+        let status_ref = data.statusref;
+        let province = data.province;
+        let conventus = data.conventus;
+        let pleiades = data.plid;
+        if (pleiades === null) {
+            var popup_text = "<b>Name : " + name + "</b><br/>Status : " + status + "<br/>Reference : " + status_ref + "<br/>Assize : " + conventus + "<br/>Province : " + province
+        } else {
+            var popup_text = "<b>Name : " + name + "</b><br/>Status : " + status + "<br/>Reference : " + status_ref + "<br/>Assize : " + conventus + "<br/>Province : " + province +
+                "<br/><a href='https://pleiades.stoa.org/places/" + pleiades + "'>Pleiades : " + pleiades + "</a>"
+        }
+        return popup_text
     }
 
 
@@ -75,6 +94,11 @@ const Atlas = () => {
                                     var marker = new L.circleMarker(latlng)
                                     marker.setStyle(style);
                                     return marker;
+                                }
+                            } onEachFeature={
+                                function (feature, layer) {                                 
+                                    let popUpText = createPopupText(feature.properties);
+                                    layer.bindPopup(popUpText, popUpStyle);
                                 }
                             }
                             />
